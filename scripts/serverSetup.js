@@ -2,7 +2,7 @@
 export async function main(ns) {
 
   /*
-  
+
     This is a list of every function used, what they do, and what the input parameters are. If a parameter is optional it will be listed as such in the format of (parameter1, parameter2?, parameter3?)
 
 
