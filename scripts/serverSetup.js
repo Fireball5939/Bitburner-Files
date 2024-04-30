@@ -41,105 +41,120 @@ export async function main(ns) {
  */
 
   const serverCount = ns.scan();
-  var currentServer = 0;
-  var portBusters = 0
+  let currentServer = 0;
+  let portBusters = 0;
   {
     /*Get the number of port busters we have */
     if (ns.fileExists('brutessh.exe', 'home') == true) {
       portBusters++
-    }
-    if (ns.fileExists('ftpcrack.exe', 'home') == true) {
-      portBusters++
-    }
-    if (ns.fileExists('relaysmtp.exe', 'home') == true) {
-      portBusters++
-    }
-    if (ns.fileExists('httpworm.exe', 'home') == true) {
-      portBusters++
-    }
-    if (ns.fileExists('sqlinject.exe', 'home') == true) {
-      portBusters++
-    }
-  }
-
-  if (ns.args.length() != 0) {
-
-    if (ns.fileExists(ns.args[0])) {
-
-
-      for (; currentServer <= serverCount.length(); currentServer++) {
-        var host = serverCount[currentServer];
-        if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
-          var maxThreads = Math.floor(ns.getServerMaxRam() / ns.getScriptRam(ns.args[0]));
-          ns.tprint('The maximum number of threads that [' + ns.args[0] + 'can run with is [' + maxThreads + '] on [' + host + '].')
-          if (ns.hasRootAccess(host) == false) {
-            var portsNeeded = ns.getServerNumPortsRequired(host);
-            ns.tprint('[' + host + '] requires [' + portsNeeded + '] ports open to run NUKE.exe');
-            if (portsNeeded <= portBusters) {
-
-            /* Open the ports of the target server */ {
-                if (portsNeeded > 0) {
-
-                  ns.brutessh(host);
-                  if (portsNeeded > 1) {
-
-                    ns.ftpcrack(host);
-                    if (portsNeeded > 2) {
-
-                      ns.relaysmtp(host);
-                      if (portsNeeded > 3) {
-
-                        ns.httpworm(host);
-                        if (portsNeeded > 4) {
-
-                          ns.sqlinject(host);
-
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              try {
-
-                ns.nuke(host);
-
-              }
-              catch (error) {
-                ns.tprint('ERROR! NUKE.exe failed due to [' + error + ']');
-              }
-              if (ns.hasRootAccess(host) == true) {
-                someRandomFunctionThatIsAFiller();
-              }
-
+      ns.tprint('BruteSSH.exe detected.')
+      if (ns.fileExists('ftpcrack.exe', 'home') == true) {
+        portBusters++
+        ns.tprint('FTPCrack.exe detected.')
+        if (ns.fileExists('relaysmtp.exe', 'home') == true) {
+          portBusters++
+          ns.tprint('RelaySMTP.exe detected.')
+          if (ns.fileExists('httpworm.exe', 'home') == true) {
+            portBusters++
+            ns, tprint('HTTPWorm.exe detected.')
+            if (ns.fileExists('sqlinject.exe', 'home') == true) {
+              portBusters++
+              ns.tprint('SQLInject.exe detected.')
             }
-
-            else {
-
-              ns.tprint('Not enough port busters developed to nuke [' + host + '], skipping server.');
-              continue;
-
-            }
-
-          }
-          else {
-
-            ns.killall(host);
-            ns.exec(ns.args[0], maxThreads);
-
           }
         }
       }
     }
     else {
-
-      ns.tprint('ERROR! File specified in argument [0] does not exist.')
-
+      ns.tprint('No port busters detected.')
     }
   }
+
+  if (ns.args.length != 0) {
+    
+    for (; currentServer < serverCount.length; currentServer++) {
+
+      let host = serverCount[currentServer];
+
+      if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
+
+        if (ns.hasRootAccess(host) == false) {
+
+          let portsNeeded = ns.getServerNumPortsRequired(host);
+          ns.tprint('[' + host + '] requires [' + portsNeeded + '] ports open to run NUKE.exe');
+
+          if (portsNeeded <= portBusters) {
+
+            /* Open the ports of the target server */ {
+
+              if (portsNeeded > 0) {
+                ns.brutessh(host);
+
+                if (portsNeeded > 1) {
+                  ns.ftpcrack(host);
+
+                  if (portsNeeded > 2) {
+                    ns.relaysmtp(host);
+
+                    if (portsNeeded > 3) {
+                      ns.httpworm(host);
+
+                      if (portsNeeded > 4) {
+                        ns.sqlinject(host);
+
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            try {
+              ns.nuke(host);
+            }
+
+            catch (error) {
+              ns.tprint('ERROR! NUKE.exe failed due to [' + error + ']');
+            }
+
+          }
+
+          else {
+
+            ns.tprint('Not enough port busters developed to nuke [' + host + '], skipping server.');
+            continue;
+
+          }
+
+        }
+
+        if (ns.args[0] == true) {
+
+          let maxThreads = Math.floor(ns.getServerMaxRam(host) / ns.getScriptRam(ns.args[1]));
+          ns.tprint('The maximum number of threads that [' + ns.args[1] + 'can run with is [' + maxThreads + '] on [' + host + '].');
+          ns.scp(ns.args[1], host);
+          if (maxThreads > 0) {
+            ns.killall(host);
+            ns.exec(ns.args[1], host, maxThreads);
+            let serverUsedRamPercentage = ns.getServerUsedRam(host) / ns.getServerMaxRam(host) * 100
+            ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.');
+
+          }
+        }
+      }
+      else {
+        ns.tprint('Player does not have a high enough hacking level for this [' + host + '], skipping server.');
+        continue;
+      }
+    }
+
+  }
+
   else {
 
-    ns.tprint('ERROR! No arguments given! Required arguments are [1], [file to copy to servers and run]')
+    ns.tprint('ERROR! No arguments given! Required arguments are [2], [weather or not to copy a file to each server], [what file to copy and run on each server]');
+    ns.tprint('|');
+    ns.tprint('Format is "run scripts/serverSetup.js (True or False) (What file to copy, only needed if arg [0] is True)"');
 
   }
 }
