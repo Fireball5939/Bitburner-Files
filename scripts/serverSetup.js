@@ -56,7 +56,7 @@ export async function main(ns) {
           ns.tprint('RelaySMTP.exe detected.')
           if (ns.fileExists('httpworm.exe', 'home') == true) {
             portBusters++
-            ns,tprint('HTTPWorm.exe detected.')
+            ns, tprint('HTTPWorm.exe detected.')
             if (ns.fileExists('sqlinject.exe', 'home') == true) {
               portBusters++
               ns.tprint('SQLInject.exe detected.')
@@ -72,75 +72,75 @@ export async function main(ns) {
 
   if (ns.args.length() != 0) {
 
-      for (; currentServer <= serverCount.length(); currentServer++) {
+    for (; currentServer <= serverCount.length(); currentServer++) {
 
-        var host = serverCount[currentServer];
+      var host = serverCount[currentServer];
 
-        if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
+      if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
 
-          if (ns.hasRootAccess(host) == false) {
+        if (ns.hasRootAccess(host) == false) {
 
-            var portsNeeded = ns.getServerNumPortsRequired(host);
-            ns.tprint('[' + host + '] requires [' + portsNeeded + '] ports open to run NUKE.exe');
+          var portsNeeded = ns.getServerNumPortsRequired(host);
+          ns.tprint('[' + host + '] requires [' + portsNeeded + '] ports open to run NUKE.exe');
 
-            if (portsNeeded <= portBusters) {
+          if (portsNeeded <= portBusters) {
 
             /* Open the ports of the target server */ {
 
-                if (portsNeeded > 0) {
-                  ns.brutessh(host);
+              if (portsNeeded > 0) {
+                ns.brutessh(host);
 
-                  if (portsNeeded > 1) {
-                    ns.ftpcrack(host);
+                if (portsNeeded > 1) {
+                  ns.ftpcrack(host);
 
-                    if (portsNeeded > 2) {
-                      ns.relaysmtp(host);
+                  if (portsNeeded > 2) {
+                    ns.relaysmtp(host);
 
-                      if (portsNeeded > 3) {
-                        ns.httpworm(host);
+                    if (portsNeeded > 3) {
+                      ns.httpworm(host);
 
-                        if (portsNeeded > 4) {
-                          ns.sqlinject(host);
+                      if (portsNeeded > 4) {
+                        ns.sqlinject(host);
 
-                        }
                       }
                     }
                   }
                 }
               }
-
-              try {
-                ns.nuke(host);
-              }
-
-              catch (error) {
-                ns.tprint('ERROR! NUKE.exe failed due to [' + error + ']');
-              }
-
             }
 
-            else {
+            try {
+              ns.nuke(host);
+            }
 
-              ns.tprint('Not enough port busters developed to nuke [' + host + '], skipping server.');
-              continue;
-
+            catch (error) {
+              ns.tprint('ERROR! NUKE.exe failed due to [' + error + ']');
             }
 
           }
 
-          if (ns.args[0] == true) {
-            
+          else {
+
+            ns.tprint('Not enough port busters developed to nuke [' + host + '], skipping server.');
+            continue;
+
+          }
+
+        }
+
+        if (ns.args[0] == true) {
+
           var maxThreads = Math.floor(ns.getServerMaxRam(host) / ns.getScriptRam(ns.args[1]));
           ns.tprint('The maximum number of threads that [' + ns.args[1] + 'can run with is [' + maxThreads + '] on [' + host + '].');
           ns.scp(ns.args[1], host);
-          if(maxThreads > 0) {
-          ns.exec(ns.args[1], host);
-          let serverUsedRamPercentage = ns.getServerUsedRam(host)/ns.getServerMaxRam(host)*100
-          ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.')
-          
-          }
+          if (maxThreads > 0) {
+            ns.exec(ns.args[1], host);
+            let serverUsedRamPercentage = ns.getServerUsedRam(host) / ns.getServerMaxRam(host) * 100
+            ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.')
+
           }
         }
+      }
     }
 
   }
