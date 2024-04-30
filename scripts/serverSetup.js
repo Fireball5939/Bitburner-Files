@@ -72,17 +72,11 @@ export async function main(ns) {
 
   if (ns.args.length() != 0) {
 
-    if (ns.fileExists(ns.args[0])) {
-
-
       for (; currentServer <= serverCount.length(); currentServer++) {
 
         var host = serverCount[currentServer];
 
         if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
-
-          var maxThreads = Math.floor(ns.getServerMaxRam() / ns.getScriptRam(ns.args[0]));
-          ns.tprint('The maximum number of threads that [' + ns.args[0] + 'can run with is [' + maxThreads + '] on [' + host + '].')
 
           if (ns.hasRootAccess(host) == false) {
 
@@ -122,9 +116,6 @@ export async function main(ns) {
               catch (error) {
                 ns.tprint('ERROR! NUKE.exe failed due to [' + error + ']');
               }
-              if (ns.hasRootAccess(host) == true) {
-                someRandomFunctionThatIsAFiller();
-              }
 
             }
 
@@ -137,21 +128,21 @@ export async function main(ns) {
 
           }
 
-          else {
-
-            ns.killall(host);
-            ns.exec(ns.args[0], maxThreads);
-
+          if (ns.args[0] == true) {
+            
+          var maxThreads = Math.floor(ns.getServerMaxRam(host) / ns.getScriptRam(ns.args[1]));
+          ns.tprint('The maximum number of threads that [' + ns.args[1] + 'can run with is [' + maxThreads + '] on [' + host + '].');
+          ns.scp(ns.args[1], host);
+          if(maxThreads > 0) {
+          ns.exec(ns.args[1], host);
+          let serverUsedRamPercentage = ns.getServerUsedRam(host)/ns.getServerMaxRam(host)*100
+          ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.')
+          
+          }
           }
         }
-      }
     }
 
-    else {
-
-      ns.tprint('ERROR! File specified in argument [0] does not exist.')
-
-    }
   }
 
   else {
