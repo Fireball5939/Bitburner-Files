@@ -134,7 +134,8 @@ export async function main(ns) {
           ns.tprint('The maximum number of threads that [' + ns.args[1] + 'can run with is [' + maxThreads + '] on [' + host + '].');
           ns.scp(ns.args[1], host);
           if (maxThreads > 0) {
-            ns.exec(ns.args[1], host);
+            ns.killall(host);
+            ns.exec(ns.args[1], host, maxThreads);
             let serverUsedRamPercentage = ns.getServerUsedRam(host) / ns.getServerMaxRam(host) * 100
             ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.');
 

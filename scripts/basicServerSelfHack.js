@@ -1,20 +1,21 @@
 /** @param {NS} ns */
 export async function main(ns) {
 
-    const host = ns.getHostName();
-    const serverMinSecurity = ns.getServerMinSecurity(host);
+    const host = ns.getHostname();
+    const serverMinSecurity = ns.getServerMinSecurityLevel(host);
     const serverMaxMoney = ns.getServerMaxMoney(host);
+    let i = 0
 
-    for (i=1; i=1;) {
+    for (i=2; i!=1; i++) {
         if (ns.getServerSecurityLevel(host) != serverMinSecurity) {
-            ns.weaken(host);
+            await ns.weaken(host);
         }
         else {
-            if (ns.serverMaxMoney(host) != ns.getServerMoneyAvaliable(host)) {
-                ns.grow(host);
+            if (serverMaxMoney != ns.getServerMoneyAvailable(host)) {
+                await ns.grow(host);
             }
             else {
-                ns.hack(host);
+                await ns.hack(host);
             }
         }
     }
