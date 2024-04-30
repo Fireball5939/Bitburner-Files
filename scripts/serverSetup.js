@@ -76,30 +76,36 @@ export async function main(ns) {
 
 
       for (; currentServer <= serverCount.length(); currentServer++) {
+
         var host = serverCount[currentServer];
+
         if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
+
           var maxThreads = Math.floor(ns.getServerMaxRam() / ns.getScriptRam(ns.args[0]));
           ns.tprint('The maximum number of threads that [' + ns.args[0] + 'can run with is [' + maxThreads + '] on [' + host + '].')
+
           if (ns.hasRootAccess(host) == false) {
+
             var portsNeeded = ns.getServerNumPortsRequired(host);
             ns.tprint('[' + host + '] requires [' + portsNeeded + '] ports open to run NUKE.exe');
+
             if (portsNeeded <= portBusters) {
 
             /* Open the ports of the target server */ {
+
                 if (portsNeeded > 0) {
-
                   ns.brutessh(host);
+
                   if (portsNeeded > 1) {
-
                     ns.ftpcrack(host);
+
                     if (portsNeeded > 2) {
-
                       ns.relaysmtp(host);
+
                       if (portsNeeded > 3) {
-
                         ns.httpworm(host);
-                        if (portsNeeded > 4) {
 
+                        if (portsNeeded > 4) {
                           ns.sqlinject(host);
 
                         }
@@ -108,11 +114,11 @@ export async function main(ns) {
                   }
                 }
               }
+
               try {
-
                 ns.nuke(host);
-
               }
+
               catch (error) {
                 ns.tprint('ERROR! NUKE.exe failed due to [' + error + ']');
               }
@@ -130,6 +136,7 @@ export async function main(ns) {
             }
 
           }
+
           else {
 
             ns.killall(host);
@@ -139,15 +146,19 @@ export async function main(ns) {
         }
       }
     }
+
     else {
 
       ns.tprint('ERROR! File specified in argument [0] does not exist.')
 
     }
   }
+
   else {
 
-    ns.tprint('ERROR! No arguments given! Required arguments are [1], [file to copy to servers and run]')
+    ns.tprint('ERROR! No arguments given! Required arguments are [2], [weather or not to copy a file to each server], [what file to copy and run on each server]');
+    ns.tprint('|');
+    ns.tprint('Format is "run scripts/serverSetup.js (True or False) (What file to copy, only needed if arg [0] is True)"');
 
   }
 }
