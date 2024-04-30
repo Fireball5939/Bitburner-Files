@@ -42,23 +42,31 @@ export async function main(ns) {
 
   const serverCount = ns.scan();
   var currentServer = 0;
-  var portBusters = 0
+  var portBusters = 0;
   {
     /*Get the number of port busters we have */
     if (ns.fileExists('brutessh.exe', 'home') == true) {
       portBusters++
+      ns.tprint('BruteSSH.exe detected.')
+      if (ns.fileExists('ftpcrack.exe', 'home') == true) {
+        portBusters++
+        ns.tprint('FTPCrack.exe detected.')
+        if (ns.fileExists('relaysmtp.exe', 'home') == true) {
+          portBusters++
+          ns.tprint('RelaySMTP.exe detected.')
+          if (ns.fileExists('httpworm.exe', 'home') == true) {
+            portBusters++
+            ns,tprint('HTTPWorm.exe detected.')
+            if (ns.fileExists('sqlinject.exe', 'home') == true) {
+              portBusters++
+              ns.tprint('SQLInject.exe detected.')
+            }
+          }
+        }
+      }
     }
-    if (ns.fileExists('ftpcrack.exe', 'home') == true) {
-      portBusters++
-    }
-    if (ns.fileExists('relaysmtp.exe', 'home') == true) {
-      portBusters++
-    }
-    if (ns.fileExists('httpworm.exe', 'home') == true) {
-      portBusters++
-    }
-    if (ns.fileExists('sqlinject.exe', 'home') == true) {
-      portBusters++
+    else {
+      ns.tprint('No port busters detected.')
     }
   }
 
