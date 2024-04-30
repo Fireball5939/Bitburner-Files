@@ -41,8 +41,8 @@ export async function main(ns) {
  */
 
   const serverCount = ns.scan();
-  var currentServer = 0;
-  var portBusters = 0;
+  let currentServer = 0;
+  let portBusters = 0;
   {
     /*Get the number of port busters we have */
     if (ns.fileExists('brutessh.exe', 'home') == true) {
@@ -70,17 +70,17 @@ export async function main(ns) {
     }
   }
 
-  if (ns.args.length() != 0) {
+  if (ns.args.length != 0) {
+    
+    for (; currentServer < serverCount.length; currentServer++) {
 
-    for (; currentServer <= serverCount.length(); currentServer++) {
-
-      var host = serverCount[currentServer];
+      let host = serverCount[currentServer];
 
       if (ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()) {
 
         if (ns.hasRootAccess(host) == false) {
 
-          var portsNeeded = ns.getServerNumPortsRequired(host);
+          let portsNeeded = ns.getServerNumPortsRequired(host);
           ns.tprint('[' + host + '] requires [' + portsNeeded + '] ports open to run NUKE.exe');
 
           if (portsNeeded <= portBusters) {
@@ -130,16 +130,20 @@ export async function main(ns) {
 
         if (ns.args[0] == true) {
 
-          var maxThreads = Math.floor(ns.getServerMaxRam(host) / ns.getScriptRam(ns.args[1]));
+          let maxThreads = Math.floor(ns.getServerMaxRam(host) / ns.getScriptRam(ns.args[1]));
           ns.tprint('The maximum number of threads that [' + ns.args[1] + 'can run with is [' + maxThreads + '] on [' + host + '].');
           ns.scp(ns.args[1], host);
           if (maxThreads > 0) {
             ns.exec(ns.args[1], host);
             let serverUsedRamPercentage = ns.getServerUsedRam(host) / ns.getServerMaxRam(host) * 100
-            ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.')
+            ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.');
 
           }
         }
+      }
+      else {
+        ns.tprint('Player does not have a high enough hacking level for this server, skipping server.');
+        continue;
       }
     }
 
