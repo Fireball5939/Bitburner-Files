@@ -142,7 +142,7 @@ export async function main(ns) {
         }
       }
       else {
-        ns.tprint('Player does not have a high enough hacking level for this server, skipping server.');
+        ns.tprint('Player does not have a high enough hacking level for this [' + host + '], skipping server.');
         continue;
       }
     }
