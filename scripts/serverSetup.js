@@ -128,19 +128,10 @@ export async function main(ns) {
 
         }
 
-        if (ns.args[0] == true) {
-
-          let maxThreads = Math.floor(ns.getServerMaxRam(host) / ns.getScriptRam(ns.args[1]));
-          ns.tprint('The maximum number of threads that [' + ns.args[1] + 'can run with is [' + maxThreads + '] on [' + host + '].');
-          ns.scp(ns.args[1], host);
-          if (maxThreads > 0) {
-            ns.killall(host);
-            ns.exec(ns.args[1], host, maxThreads);
-            let serverUsedRamPercentage = ns.getServerUsedRam(host) / ns.getServerMaxRam(host) * 100
-            ns.tprint('Server [' + host + '] is using [' + serverUsedRamPercentage + '%] of its max ram.');
-
-          }
+        if(ns.args[0] == "-r" && ns.hasRootAccess == true) {
+          
         }
+
       }
       else {
         ns.tprint('Player does not have a high enough hacking level for this [' + host + '], skipping server.');
@@ -152,9 +143,9 @@ export async function main(ns) {
 
   else {
 
-    ns.tprint('ERROR! No arguments given! Required arguments are [2], [weather or not to copy a file to each server], [what file to copy and run on each server]');
+    ns.tprint('ERROR! No arguments given! Required arguments are [1], [Is the program recursive]');
     ns.tprint('|');
-    ns.tprint('Format is "run scripts/serverSetup.js (True or False) (What file to copy, only needed if arg [0] is True)"');
+    ns.tprint('Format is "run scripts/serverSetup.js (-r or any other string)"');
 
   }
 }
