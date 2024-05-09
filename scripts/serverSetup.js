@@ -128,7 +128,10 @@ export async function main(ns) {
 
         }
 
-        if(ns.args[0] == "-r" && ns.hasRootAccess == true) {
+        if(ns.args[0] == "-r" && ns.hasRootAccess(host) == true && ns.getServerMaxRam(host) >= ns.getScriptRam('/scripts/serverSetup.js')) {
+          
+          ns.scp("/scripts/serverSetup.js", host);
+          ns.exec("/scripts/serverSetup.js", host, 1, "-r");
           
         }
 
