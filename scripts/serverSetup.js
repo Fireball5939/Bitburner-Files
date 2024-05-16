@@ -18,6 +18,8 @@ export async function main(ns) {
 
   */
 
+
+
   //Declare the needed variables
   let serverArray = ns.scan();
   let currentServer = 0;
@@ -35,6 +37,29 @@ export async function main(ns) {
     "info": "\x1b[0m",
     "warn": "\x1b[38;5;226m",
     "error": "\x1b[38;5;196m"
+  }
+
+  //Check to see if the given file in argument 2 (ns.args[1]) exists
+  if (ns.args[0] != "--copy-file" && ns.args[0] != undefined && ns.args[0] != "--help") {
+    ns.tprint(color.error + "ERROR! Unknown argument! Try --help if you need help")
+  }
+  if(ns.args[0] == "--help") {
+    ns.tprint(color.info + "What this program does: This program will check every server in the game to see if the player has a high enough hacking level for them, and if so will use every port buster the player has and that hasn't been used on the server before on that server. It will then attempt to run NUKE.exe on them to gain root access. There are a few arguments that can be given to this program.")
+    ns.tprint(color.info + "|")
+    ns.tprint(color.info + "|")
+    ns.tprint(color.info + "|")
+    ns.tprint(color.info + "--copy-file")
+    ns.tprint(color.info + "|-What this argument does is it tells the program that a given file will be copied and run on each server, if used the next argument must be a valid file on the host machine of this script")
+    ns.tprint(color.info + "|")
+    ns.tprint(color.info + "--kill-all")
+    ns.tprint(color.info + "|-What this argument does is instead of using the remaining ram on each server it runs the given script at the max number of threads it can by killing all processes on the servers.")
+    ns.exit();
+  }
+  if (ns.args[0] == "--copy-file") {
+    if (ns.fileExists(ns.args[1]) === false) {
+      ns.tprint(color.error + "ERROR! Given file does not exist on this machine! Exiting program");
+      ns.exit();
+    }
   }
 
   //Get the amount of port buster programs on the home machine
@@ -107,6 +132,28 @@ export async function main(ns) {
       catch (error) {
         ns.tprint(color.error + "ERROR! Could not run ns.nuke() on machine [" + targetProperties.hostname + "] due to [" + error + "]");
       }
+    }
+
+    if (targetProperties.hasAdminRights === true && ns.args[0] == "--copy-file") {
+
+      let maxThreads = 0;
+      ns.scp(ns.args[1], targetProperties.hostname);
+
+      if (ns.args[2] == "--kill-all") {
+        ns.tprint(color.info + "Info: Killing all scripts on machine [" + targetProperties.hostname + "]");
+        ns.killall(targetProperties.hostname);
+        maxThreads = Math.floor(targetProperties.maxRam / ns.getScriptRam(ns.args[1]));
+      }
+      else {
+        const remainingRam = targetProperties.maxRam - targetProperties.ramUsed;
+        maxThreads = Math.floor(remainingRam / ns.getScriptRam(ns.args[1]));
+      }
+
+      if (maxThreads > 0) {
+      ns.tprint(color.info + "Info: Running program [" + ns.args[1] + "] on machine [" + targetProperties.hostname + "] with thread count [" + maxThreads + "]");
+      ns.exec(ns.args[1], targetProperties.hostname, maxThreads);
+      }
+
     }
 
     completedServers.push(targetProperties.hostname);
