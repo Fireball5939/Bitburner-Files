@@ -39,9 +39,9 @@ export async function main(ns) {
 
   //Declare the color object
   const color = {
-    "info": "\x1b[38;5;255m",
-    "warn": "\x1b[38;5;226m",
-    "error": "\x1b[38;5;196m"
+    "info": "\x1b[38;5;255m", // Set the info color to white
+    "warn": "\x1b[38;5;226m", // Set the warn color to yellow 
+    "error": "\x1b[38;5;196m" // Set the error color to red
   }
 
   if (ns.args.includes("--help")) {
@@ -101,15 +101,18 @@ export async function main(ns) {
 
       const targetProperties = ns.getServer(serverArray[currentServer]);
 
+      // Skip the server if it's the home machine
       if (targetProperties.hostname === "home") {
         ns.print(color.warn + "Warning! Target machine is home machine, skipping server.");
         continue;
       }
+      // Skip the server if it has already been tested
       if (completedServers.includes(targetProperties.hostname)) {
         ns.print(color.warn + "Warning! Target machine has already been hit by this program, skipping server");
         continue;
       }
       ns.tprint(color.info + "Info: Target machine is [" + targetProperties.hostname + "]")
+      // Skip the server if the hacking level for it is greater than the player's current hacking level
       if (targetProperties.requiredHackingSkill > ns.getHackingLevel()) {
         completedServers.push(targetProperties.hostname);
         serverArray.push(...ns.scan(targetProperties.hostname));
@@ -148,7 +151,7 @@ export async function main(ns) {
         }
       }
 
-      if (targetProperties.hasAdminRights === true && ns.args.includes("--copy-file" || "-c")) {
+      if (targetProperties.hasAdminRights === true && ns.args.includes("--copy-file")) { // In the future I want to make it so this accepts --copy-file or -c
 
         // Returns a weight that can be used to sort servers by hack desirability
         function Weight(ns, server) {
@@ -173,7 +176,9 @@ export async function main(ns) {
           // and we add hackChance to the mix (pre-formulas.exe hack chance formula is based on current security, which is useless)
           let weight = so.moneyMax / ns.formulas.hacking.weakenTime(so, player) * ns.formulas.hacking.hackChance(so, player);
           return weight;
-          }
+        }
+
+        // Compare the output of the Weight function to the current highest weight found, if it is found to be larger then set the new weight value and hostname
         let serverWeight = Weight(ns, targetProperties);
         if (highestWeight[0] < serverWeight) {
           highestWeight = [serverWeight, targetProperties.hostname];
@@ -182,6 +187,7 @@ export async function main(ns) {
         let maxThreads = 0;
         ns.scp(fileInput, targetProperties.hostname);
 
+        // Calculate the maximum number of threads the specified script can run with on the target server
         if (ns.args.includes("--kill-all")) {
           ns.tprint(color.info + "Info: Killing all scripts on machine [" + targetProperties.hostname + "]");
           ns.killall(targetProperties.hostname);
