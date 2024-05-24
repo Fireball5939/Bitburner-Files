@@ -176,5 +176,5 @@ export async function main(ns) {
     }
   }
   scanServers(fileInput);
-  if(ns.args.includes("--ls")) ns.tprint("We have hacked the following servers [" + completedServers + "]");
+  if(ns.args.includes("--ls")) ns.tprint(color.info + "We have hacked the following servers [" + completedServers + "]");
 }
