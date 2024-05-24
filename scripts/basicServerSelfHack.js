@@ -1,10 +1,15 @@
 /** @param {NS} ns */
 export async function main(ns) {
 
-    const host = ns.getHostname();
-    const serverMinSecurity = ns.getServerMinSecurityLevel(host);
-    const serverMaxMoney = ns.getServerMaxMoney(host);
+    const host = ns.args[0];
+    const serverMinSecurity = ns.args[1];
+    const serverMaxMoney = ns.args[2];
     let securityReset = 0
+
+    if(serverMaxMoney == 0) {
+        ns.tprint("Closing this program on server [" + host + "] due to server not having money to hack.")
+        ns.exit();
+    }
 
     while (true) {
 
