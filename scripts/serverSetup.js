@@ -26,7 +26,7 @@ export async function main(ns) {
   //Declare the needed variables
   let serverArray = ns.scan();
   let currentServer = 0;
-  let fileInput = "";
+  let fileInput = ``;
 
   let hasSSH = false;
   let hasFTP = false;
@@ -39,157 +39,172 @@ export async function main(ns) {
 
   //Declare the color object
   const color = {
-    "info": "\x1b[38;5;255m", // Set the info color to white
-    "warn": "\x1b[38;5;226m", // Set the warn color to yellow 
-    "error": "\x1b[38;5;196m" // Set the error color to red
+    "info"  : `\x1b[38;5;255m`, // Set the info color to white
+    "warn"  : `\x1b[38;5;226m`, // Set the warn color to yellow 
+    "error" : `\x1b[38;5;196m`  // Set the error color to red
   }
 
-  if (ns.args.includes("--help")) {
-    ns.tprint(color.info + "What this program does:");
-    ns.tprint(color.info + "This program will check every server in the game to see if the player has a high enough hacking level for them, and if so will use every port buster");
-    ns.tprint(color.info + "the player has and that hasn't been used on the server before on that server. It will then attempt to run NUKE.exe on them to gain root access.");
-    ns.tprint(color.info + "There are a few arguments that can be given to this program.");
-    ns.tprint(color.info + "|");
-    ns.tprint(color.info + "|");
-    ns.tprint(color.info + "|");
-    ns.tprint(color.info + "|--copy-file");
-    ns.tprint(color.info + "|---What this argument does is it tells the program that a given file will be copied and run on each server, if used the next argument must be a");
-    ns.tprint(color.info + "|---valid file on the host machine of this script")
-    ns.tprint(color.info + "|");
-    ns.tprint(color.info + "|--kill-all");
-    ns.tprint(color.info + "|---What this argument does is instead of using the remaining ram on each server it runs the given script at the max number of threads it can by");
-    ns.tprint(color.info + "|---killing all processes on the servers.");
-    ns.tprint(color.info + "|");
-    ns.tprint(color.info + "|--help");
-    ns.tprint(color.info + "|---Prints this message then exits the program, any arguments given if this is used are thrown away.");
+  if (ns.args.includes(`-h`) || ns.args.includes(`--help`)) {
+    ns.tprint(`${color.info} + What this program does:
+    This program will check every server in the game to see if the player has a high enough hacking level for them, and if so will use every port buster
+    the player has and that hasn't been used on the server before on that server. It will then attempt to run NUKE.exe on them to gain root access.
+    There are a few arguments that can be given to this program.
+    |
+    |
+    |
+    |-c
+    |++This will tell the script to copy a file to every server and run it if it's a script. If used the program will wait for an input in the prompt.
+    |
+    |--copyfile
+    |+++See -c.
+    |
+    |-k
+    |++This will kill all processes on every server once it has been hacked.
+    |
+    |--killall
+    |+++See -k.
+    |
+    |-l
+    |++At the end of the script the program will print a list of every server that gained root access, and their used ram compared to max ram.
+    |
+    |--ls
+    |+++See -l
+    |
+    |-h
+    |++Prints this message then exits the program.
+    |
+    |--help
+    |+++See -h.`);
     ns.exit();
   }
-  if (ns.args.includes("--copy-file")) {
-    fileInput = await ns.prompt("What file are we copying?", { type: "text" });
+
+  if (ns.args.includes(`-c`) || ns.args.includes(`--copyfile`)) {
+    fileInput = await ns.prompt(`What file are we copying?`, {type: `text`});
     if (ns.fileExists(fileInput) === false) {
-      ns.tprint(color.error + "ERROR! Given file does not exist on this machine! Exiting program");
+      ns.tprint(`${color.error}ERROR! Given file does not exist on this machine! Exiting program`);
       ns.exit();
     }
   }
 
   //Get the amount of port buster programs on the home machine
   {
-    if (ns.fileExists("BruteSSH.exe", "home") == true) {
+    if (ns.fileExists(`BruteSSH.exe`, `home`) == true) {
       hasSSH = true;
-      ns.tprint(color.info + "Info: Found file [BruteSSH.exe] on machine [home]")
+      ns.tprint(`${color.info}Info: Found file [BruteSSH.exe] on machine [home]`);
     }
-    if (ns.fileExists("FTPCrack.exe", "home") == true) {
+    if (ns.fileExists(`FTPCrack.exe`, `home`) == true) {
       hasFTP = true;
-      ns.tprint(color.info + "Info: Found file [FTPCrack.exe] on machine [home]")
+      ns.tprint(`${color.info}Info: Found file [FTPCrack.exe] on machine [home]`);
     }
-    if (ns.fileExists("relaySMTP.exe", "home") == true) {
+    if (ns.fileExists(`relaySMTP.exe`, `home`) == true) {
       hasSMTP = true;
-      ns.tprint(color.info + "Info: Found file [relaySMTP.exe] on machine [home]")
+      ns.tprint(`${color.info}Info: Found file [relaySMTP.exe] on machine [home]`);
     }
-    if (ns.fileExists("HTTPWorm.exe", "home") == true) {
+    if (ns.fileExists(`HTTPWorm.exe`, `home`) == true) {
       hasHTTP = true;
-      ns.tprint(color.info + "Info: Found file [HTTPWorm.exe] on machine [home]")
+      ns.tprint(`${color.info}Info: Found file [HTTPWorm.exe] on machine [home]`);
     }
-    if (ns.fileExists("SQLInject.exe", "home") == true) {
+    if (ns.fileExists(`SQLInject.exe`, `home`) == true) {
       hasSQL = true;
-      ns.tprint(color.info + "Info: Found file [SQLInject.exe] on machine [home]")
+      ns.tprint(`${color.info}Info: Found file [SQLInject.exe] on machine [home]`);
     }
   }
 
-  function scanServers(fileInput) {
-    for (let highestWeight = [0, "home"]; serverArray.length > currentServer; currentServer++) {
+  function appendArrays(completedServers, targetProperties, serverArray) {
+    completedServers.push(targetProperties.hostname);
+    serverArray.push(...ns.scan(targetProperties.hostname));
+    serverArray = serverArray.filter((server) => server != `home`);
+  }
 
-      const targetProperties = ns.getServer(serverArray[currentServer]);
+  async function scanServers(fileInput) {
+    for (let highestWeight = []; serverArray.length > currentServer; currentServer++) {
+
+      const targetProperties = await ns.getServer(serverArray[currentServer]);
+      await ns.sleep(20);
 
       // Skip the server if it's the home machine
-      if (targetProperties.hostname === "home") {
-        ns.print(color.warn + "Warning! Target machine is home machine, skipping server.");
+      if (targetProperties.hostname === `home`) {
+        ns.print(`${color.warn}Warning! Target machine is home machine, skipping server.`);
         continue;
       }
       // Skip the server if it has already been tested
       if (completedServers.includes(targetProperties.hostname)) {
-        ns.print(color.warn + "Warning! Target machine has already been hit by this program, skipping server");
+        ns.print(`${color.warn}Warning! Target machine has already been hit by this program, skipping server`);
         continue;
       }
-      ns.tprint(color.info + "Info: Target machine is [" + targetProperties.hostname + "]")
+      ns.tprint(`${color.info}Info: Target machine is [${targetProperties.hostname}]`)
       // Skip the server if the hacking level for it is greater than the player's current hacking level
       if (targetProperties.requiredHackingSkill > ns.getHackingLevel()) {
-        completedServers.push(targetProperties.hostname);
-        serverArray.push(...ns.scan(targetProperties.hostname));
-        serverArray = serverArray.filter((server) => server != "home");
-        ns.tprint(color.warn + "Warning! Target machine has a higher required hacking level than the player currently has, skipping server");
+        appendArrays(completedServers, targetProperties.hostname, serverArray);
+        ns.tprint(`${color.warn}Warning! Target machine has a higher required hacking level than the player currently has, skipping server`);
         continue;
       }
 
       if (targetProperties.sshPortOpen === false && hasSSH === true) {
         ns.brutessh(targetProperties.hostname);
-        ns.tprint(color.info + "Info: Ran ns.brutessh() on machine [" + targetProperties.hostname + "]");
+        ns.tprint(`${color.info}Info: Ran ns.brutessh() on machine [${targetProperties.hostname}]`);
       }
       if (targetProperties.ftpPortOpen === false && hasFTP === true) {
         ns.ftpcrack(targetProperties.hostname);
-        ns.tprint(color.info + "Info: Ran ns.ftpcrack() on machine [" + targetProperties.hostname + "]");
+        ns.tprint(`${color.info}Info: Ran ns.ftpcrack() on machine [${targetProperties.hostname}]`);
       }
       if (targetProperties.smtpPortOpen === false && hasSMTP === true) {
         ns.relaysmtp(targetProperties.hostname);
-        ns.tprint(color.info + "Info: Ran ns.relaysmtp() on machine [" + targetProperties.hostname + "]");
+        ns.tprint(`${color.info}Info: Ran ns.relaysmtp() on machine [${targetProperties.hostname}]`);
       }
       if (targetProperties.httpPortOpen === false && hasHTTP === true) {
         ns.httpworm(targetProperties.hostname);
-        ns.tprint(color.info + "Info: Ran ns.httpworm() on machine [" + targetProperties.hostname + "]");
+        ns.tprint(`${color.info}Info: Ran ns.httpworm() on machine [${targetProperties.hostname}]`);
       }
       if (targetProperties.sqlPortOpen === false && hasSQL === true) {
         ns.sqlinject(targetProperties.hostname);
-        ns.tprint(color.info + "Info: Ran ns.sqlinject() on machine [" + targetProperties.hostname + "]");
+        ns.tprint(`${color.info}Info: Ran ns.sqlinject() on machine [${targetProperties.hostname}]`);
       }
       if (targetProperties.hasAdminRights === false) {
         try {
           ns.nuke(targetProperties.hostname);
-          ns.tprint(color.info + "Info: Attempting to run ns.nuke on machine [" + targetProperties.hostname + "]");
+          ns.tprint(`${color.info}Info: Attempting to run ns.nuke on machine [${targetProperties.hostname}]`);
         }
         catch (error) {
-          ns.tprint(color.error + "ERROR! Could not run ns.nuke() on machine [" + targetProperties.hostname + "]");
+          ns.tprint(`${color.error}ERROR! Could not run ns.nuke() on machine [${targetProperties.hostname}]`);
         }
       }
 
-      if (targetProperties.hasAdminRights === true && ns.args.includes("--copy-file")) { // In the future I want to make it so this accepts --copy-file or -c
+      if (targetProperties.hasAdminRights === true && (ns.args.includes(`-c`) || ns.args.includes(`--copyfile`))) {
 
         // Returns a weight that can be used to sort servers by hack desirability
+        // Thanks to xsinx in the BitBurner discord for the function, it can be found pinned in the #early-game channel. I've modified it slightly to work better with this script but the vast majority of this function is unmodified
         function Weight(ns, server) {
           if (!server) return 0;
 
           // Don't ask, endgame stuff
           if (server.hostname.startsWith('hacknet-node')) return 0;
 
-          // Skip home
-          if (server.hostname.startsWith('home')) return 0; ns.tprint(color.warn + "DEBUG: Skipping home for weight calculation");
-
-          // Get the server information
-          let so = server;
-
           // Get the player information
           let player = ns.getPlayer();
 
           // Set security to minimum on the server object (for Formula.exe functions)
-          so.hackDifficulty = so.minDifficulty;
+          server.hackDifficulty = server.minDifficulty;
 
           // We use weakenTime instead of minDifficulty since we got access to it, 
           // and we add hackChance to the mix (pre-formulas.exe hack chance formula is based on current security, which is useless)
-          let weight = so.moneyMax / ns.formulas.hacking.weakenTime(so, player) * ns.formulas.hacking.hackChance(so, player);
+          let weight = server.moneyMax / ns.formulas.hacking.weakenTime(server, player) * ns.formulas.hacking.hackChance(server, player);
           return weight;
         }
 
         // Compare the output of the Weight function to the current highest weight found, if it is found to be larger then set the new weight value and hostname
         let serverWeight = Weight(ns, targetProperties);
-        if (highestWeight[0] < serverWeight) {
-          highestWeight = [serverWeight, targetProperties.hostname];
-        }
+        if (highestWeight[0] < serverWeight) highestWeight = [serverWeight, targetProperties.hostname];
 
+        let isScript = false;
         let maxThreads = 0;
         ns.scp(fileInput, targetProperties.hostname);
 
+        if (fileInput.includes(`.js`) || fileInput.includes(`.script`)) {
+        isScript = true;
         // Calculate the maximum number of threads the specified script can run with on the target server
-        if (ns.args.includes("--kill-all")) {
-          ns.tprint(color.info + "Info: Killing all scripts on machine [" + targetProperties.hostname + "]");
+        if (ns.args.includes(`--kill-all`)) {
+          ns.tprint(`${color.info}Info: Killing all scripts on machine [${targetProperties.hostname}]`);
           ns.killall(targetProperties.hostname);
           maxThreads = Math.floor(targetProperties.maxRam / ns.getScriptRam(fileInput));
         }
@@ -197,22 +212,30 @@ export async function main(ns) {
           const remainingRam = targetProperties.maxRam - targetProperties.ramUsed;
           maxThreads = Math.floor(remainingRam / ns.getScriptRam(fileInput));
         }
+      }
 
-        if (maxThreads > 0) {
+        if (maxThreads > 0 && isScript === true) {
           let highestWeightServer = ns.getServer(highestWeight[1])
-          ns.tprint(color.info + "Info: Running program [" + fileInput + "] on machine [" + targetProperties.hostname + "] with thread count [" + maxThreads + "]");
+          ns.tprint(`${color.info}Info: Running program [${fileInput}] on machine [${targetProperties.hostname}] with thread count [${maxThreads}]`);
           ns.exec(fileInput, targetProperties.hostname, maxThreads, highestWeightServer.hostname, highestWeightServer.minDifficulty, highestWeightServer.moneyMax);
         }
 
       }
 
       if (targetProperties.hasAdminRights === true) hackedServers.push(targetProperties.hostname);
-      completedServers.push(targetProperties.hostname);
-      serverArray.push(...ns.scan(targetProperties.hostname));
-      serverArray = serverArray.filter((server) => server != "home");
+      appendArrays(completedServers, targetProperties.hostname, serverArray);
 
     }
   }
   scanServers(fileInput);
-  if (ns.args.includes("--ls")) ns.tprint(color.info + "We have hacked the following servers [" + hackedServers + "]");
+  if (ns.args.includes(`-l`) || ns.args.includes(`--ls`)) {
+    let serverObject = {}
+    ns.tprint(`${color.info}Info: The script hacked the following servers with the following properties:`)
+    hackedServers.forEach((server) =>
+      serverObject = ns.getServer(hackedServers[server]),
+      ns.tprint(`${color.info}Server Name [${serverObject.hostname}]. Used Ram/Max Ram [${serverObject.ramUsed}/${serverObject.maxRam}]`)
+    );
+    
+  }
+  await scanServers(fileInput);
 }
